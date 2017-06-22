@@ -12,6 +12,11 @@
 #include "radius.h"
 #include "conf.h"
 
+#ifdef USEMYSQL
+#include <mysql/mysql.h>
+#endif
+
+
 /* Server data structures */
 
 typedef struct attr_flags {
@@ -51,6 +56,7 @@ typedef struct value_pair {
 	int			length; /* of strvalue */
 	ATTR_FLAGS		flags;
 	UINT4			lvalue;
+	UINT4			lvalueh;
 	int			operator;
 	char			strvalue[AUTH_STRING_LEN];
 	int			group;
@@ -112,6 +118,7 @@ typedef struct realm_opts {
 	unsigned int		noauth:1;
 	unsigned int		noacct:1;
 	unsigned int		trusted:1;
+	unsigned int		wildcard:1;
 } REALM_OPTS;
 
 typedef struct realm {
@@ -136,8 +143,15 @@ enum {
   PW_OPERATOR_SUB,		/* -= */
 };
 
-#define DEBUG	if(debug_flag)log_debug
-#define DEBUG2  if (debug_flag > 1)log_debug
+#define DEBUG(fmt, args...)	do { \
+				if (1/* debug_flag*/) \
+				log_debug("%s: " fmt, __FUNCTION__ , ## args); \
+				} while(0)
+
+#define DEBUG2(fmt, args...)	do{ \
+				if (debug_flag > 1) \
+				log_debug("%s: " fmt, __FUNCTION__ , ## args); \
+				} while(0)
 
 #define SECONDS_PER_DAY		86400
 #define MAX_REQUEST_TIME	30
@@ -206,6 +220,7 @@ extern int		radius_pid;
 extern int		use_dbm;
 extern int		use_dns;
 extern int		use_wtmp;
+extern int		use_utmp;
 extern int		log_stripped_names;
 extern int		cache_passwd;
 extern UINT4		myip;
@@ -350,3 +365,110 @@ char		*radius_xlate(char *, VALUE_PAIR *req, VALUE_PAIR *reply);
 /* timestr.c */
 int		timestr_match(char *, time_t);
 
+/* mysql.c */
+#ifdef USEMYSQL
+
+#define MAX_NUM_GROUP	20
+
+ typedef struct session_rec {
+
+	u_char		id[33];
+	u_char		name[32];
+	u_int		start;
+	u_int		port;
+	u_int		protocol;
+	long		time_used;
+	u_char		server[20];
+	u_char		ip[14];
+	u_int		service_type;
+	u_int		auth;
+       	u_int		outbytes;
+        u_int		inbytes;
+	u_int		outpackets;
+	u_int		inpackets;
+	u_int		term_cause;
+	u_char		call_to[14];
+	u_char		call_from[14];
+	u_int		port_type;
+	u_int		delay;
+	u_char		connect_info[30];
+	u_int		data_rate;
+	u_int		xmit_rate;
+	char		prefix;
+
+} SESSION_REC;
+
+typedef struct sql_pwdname {
+
+	char	fname[32];
+	char	name[32];
+	char	passwd[32];
+	u_int	gid;
+	float	money;
+	u_int	time;
+	u_int	activ;
+	u_int	block;
+	u_int	igroup;
+	u_int	type;
+	u_char	prefix[10];
+	char	callback[15];
+	u_char	ip[16];
+	char	allow_phone[150];
+	
+} SQL_PWD;
+
+typedef struct tariff {
+	u_int	type;
+	u_int	bytes;
+	float	cost;
+} TARIFF;
+
+typedef struct sql_pwgroup {
+/*	LIST_ENTRY(sql_pwgroup)	next;*/
+	char	grname[23];
+	u_int	gid;
+	u_int	type; /* 0:(unlim) 1:(time) 2:(traf) 3:() 4:(day) */ 
+	float	hour[9][24]; 
+	float	traf[9][24];
+	TARIFF	traf_s[10];
+	float	freesec;
+	float	traf_cost;
+	u_int	one_mb;
+	u_int	type_traf;  /* 0:() 1:() 2:() 3:() */
+	char	prefix;
+	float	day_cost;
+	u_int	use_callback;
+
+} SQL_PWGROUP;
+	
+/*LIST_HEAD(sql_pwgroup_head,sql_pwgroup)	sql_pwgroup_chain;*/
+
+int	sql_read_config(); 
+void	get_session(VALUE_PAIR *pair, SESSION_REC *rec);
+MYSQL	*sql_reconnect();
+int	sql_query(const char *query, MYSQL *mysql);
+void	save_session(SESSION_REC *rec);
+SQL_PWD	*sql_getpwname(char *name); 
+#ifdef CREATE_NAME_TABLE
+int     sql_create_name_table(char *name);
+#endif
+int	sql_crypt(char *name, char *string); 
+int	sql_run_query(const char *query); 
+double	time2moneyH(long start_time, long stop_time, u_int igroup);
+double	time2moneyT(long start_time, long stop_time, u_int igroup);
+long	money2time(double money, u_int igroup); 
+
+int		hourgroup;
+int		trafgroup;
+SQL_PWGROUP	group[MAX_NUM_GROUP];
+int		passwdhash;
+int		acct_alive;
+int		append_table;
+int		downcost_type;
+
+/* chap.c */
+int		hex2bin(const char *szHex, unsigned char *szBin, int len);
+void		mschap(const char *, u_char *, char *, int);
+void		mschap2(const char *, const char *, SQL_PWD *, char *);
+void		mschap2_resp(SQL_PWD *, char *, char *, char *, char *);
+#endif

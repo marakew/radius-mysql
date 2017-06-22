@@ -1,0 +1,46 @@
+#!/bin/sh
+
+radclient="./radclient"
+server=127.0.0.1
+secrets=testing123
+
+date_on = `date "+%Y%m%d%H%M%S"`
+
+case "$1" in
+        start)
+(
+echo "Acct-Status-Type = Start"
+echo "User-Name = \"test\""
+echo "Acct-Session-Id = \"123456789abcdef\""
+echo "Framed-IP-Address = \"12.1.113.210\""
+echo "Service-Type = Framed-User"
+echo "Framed-Protocol = PPP"
+echo "Framed-Compression = Van-Jacobson-TCP-IP"
+echo "NAS-IP-Address = 12.1.113.131"
+echo "NAS-Port-Id = 7"
+echo "Acct-Delay-Time = 0"
+) | ${radclient} ${server} acct ${secrets}
+
+	;;
+        stop)
+
+(
+echo "Acct-Status-Type = Stop"
+echo "User-Name = \"test\""
+echo "Acct-Session-Id = \"123456789abcdef\""
+echo "Framed-IP-Address = \"12.1.113.210\""
+echo "Acct-Output-Octets = 150123"
+echo "Acct-Input-Octets = 25785"
+echo "Acct-Output-Packets = 12"
+echo "Acct-Input-Packets = 47"
+echo "Acct-Session-Time = 377"
+echo "Service-Type = Framed-User"
+echo "Framed-Protocol = PPP"
+echo "Framed-Compression = Van-Jacobson-TCP-IP"
+echo "NAS-IP-Address = 12.1.113.131"
+echo "NAS-Port-Id = 7"
+echo "Acct-Delay-Time = 0"
+) | ${radclient} ${server} acct ${secrets}
+	;;
+esac
+

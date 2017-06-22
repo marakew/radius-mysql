@@ -3,12 +3,15 @@
 #		Remote Authentication Dial In User Service
 #
 #
+DIRLOG	 = /var/log
 
 RADIUS_DIR    = /etc/raddb
 
-SERVER_OBJS   = radiusd.o files.o acct.o pam.o version.o proxy.o \
-			exec.o auth.o timestr.o cache.o readusers.o
-LIB_OBJS      = dict.o util.o md5.o attrprint.o radius.o log.o pair.o encrattr.o
+SERVER_OBJS   = radiusd.o files.o acct.o version.o proxy.o \
+			exec.o auth.o timestr.o readusers.o mysql.o chap.o
+#SERVER_OBJS   = radiusd.o files.o acct.o pam.o version.o proxy.o \
+#			exec.o auth.o timestr.o cache.o readusers.o mysql.o
+LIB_OBJS      = dict.o util.o md5.o md4.o attrprint.o radius.o log.o pair.o encrattr.o
 
 INCLUDES       = radius.h conf.h
 
@@ -23,13 +26,13 @@ dbm:
 radiusd: $(SERVER_OBJS) $(LIB_OBJS)
 	$(CC) $(LDFLAGS) -o radiusd $(SERVER_OBJS) \
 	$(LIB_OBJS) \
-	$(LIBS) $(LCRYPT) $(PAMLIB) $(DBMLIB)
+	$(LIBS) $(LCRYPT) $(PAMLIB) $(DBMLIB) $(MYSQLLIB)
 
 radiusd.o: radiusd.c $(INCLUDES)
-	$(CC) $(CFLAGS) $(DBM) -c radiusd.c
+	$(CC) $(CFLAGS) $(DBM) $(MYSQL) -c radiusd.c
 
 acct.o: acct.c $(INCLUDES)
-	$(CC) $(CFLAGS) -c acct.c
+	$(CC) $(CFLAGS) $(MYSQL) -c acct.c
 
 log.o: log.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c log.c
@@ -41,10 +44,10 @@ dict.o: dict.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c dict.c
 
 files.o: files.c $(INCLUDES)
-	$(CC) $(CFLAGS) $(DBM) $(PAM) -c files.c
+	$(CC) $(CFLAGS) $(DBM) $(PAM) $(MYSQL) -c files.c
 
 radius.o: radius.c $(INCLUDES)
-	$(CC) $(CFLAGS) -c radius.c
+	$(CC) $(CFLAGS) $(MYSQL) -c radius.c
 
 readusers.o: readusers.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c readusers.c
@@ -52,11 +55,17 @@ readusers.o: readusers.c $(INCLUDES)
 util.o: util.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c util.c
 
-pam.o:  pam.c $(INCLUDES)
-	$(CC) $(CFLAGS) $(PAM) -c pam.c
+#pam.o:  pam.c $(INCLUDES)
+#	$(CC) $(CFLAGS) $(PAM) -c pam.c
 
-cache.o:  cache.c $(INCLUDES)
-	$(CC) $(CFLAGS) -c cache.c 
+mysql.o: mysql.c $(INCLUDES)
+	$(CC) $(CFLAGS) $(MYSQL) -c mysql.c
+
+chap.o: chap.c $(INCLUDES)
+	$(CC) $(CFLAGS) $(MYSQL) -c chap.c
+
+#cache.o:  cache.c $(INCLUDES)
+#	$(CC) $(CFLAGS) -c cache.c 
 
 proxy.o:  proxy.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c proxy.c
@@ -65,7 +74,7 @@ exec.o:  exec.c $(INCLUDES)
 	$(CC) $(CFLAGS) -c exec.c
 
 auth.o:  auth.c $(INCLUDES)
-	$(CC) $(CFLAGS) $(PAM) -c auth.c
+	$(CC) $(CFLAGS) $(PAM) $(MYSQL) -c auth.c
 
 pair.o: pair.c $(INCLUDES)
 	$(CC) $(CFLAGS) $(PAM) -c pair.c
@@ -92,6 +101,15 @@ radrelay.o: radrelay.c $(INCLUDES)
 
 md5.o: md5.c md5.h
 	$(CC) $(CFLAGS) -c md5.c
+
+md4.o: md4.c md4.h
+	$(CC) $(CFLAGS) -c md4.c
+
+#deskey.o: deskey.c des.h
+#	$(CC) $(CFLAGS) -c deskey.c
+
+#desport.o: desport.c des.h
+#	$(CC) $(CFLAGS) -c desport.c
 
 builddbm: builddbm.o readusers.o $(LIB_OBJS)
 	test -z "$(DBM)" || $(CC) $(LDFLAGS) -o builddbm \
@@ -121,8 +139,13 @@ install:
 	$(DINSTALL) $(SBINDIR)
 	$(DINSTALL) $(BINDIR)
 	$(DINSTALL) $(RADIUS_DIR)
+	$(DINSTALL) -m 700 $(DIRLOG)/radacct
+#	$(INSTALL) -m 755 -s radutmp  $(DIRLOG)/radutmp
+#	$(INSTALL) -m 755 -s radwtmp  $(DIRLOG)/radwtmp
+#	$(INSTALL) -m 755 -s radius.log  $(DIRLOG)/radius.log
 	$(INSTALL) -m 755 -s radiusd  $(SBINDIR)/radiusd
 	$(INSTALL) -m 755 -s radrelay $(SBINDIR)/radrelay
+	$(INSTALL) -m 755 -s radkill $(SBINDIR)/radkill
 	$(INSTALL) -m 755 -s radwho  $(BINDIR)
 	$(INSTALL) -m 755 -s raduse  $(BINDIR)
 	$(INSTALL) -m 755 -s radzap  $(BINDIR)
@@ -139,10 +162,10 @@ install:
 		    $(INSTALL) -m 644 $$manfile $(MANDIR)/man$$section; \
 		done ; \
 	done
-	test -n "$(DBM)" || rm -f $(MANDIR)/man8/builddbm.8rad
-	@if [ -d /etc/pam.d/ ] && [ ! -f /etc/pam.d/radius ]; then \
-		$(INSTALL) -m 644 ../redhat/radiusd-pam /etc/pam.d/radius;\
-	fi
+#	test -n "$(DBM)" || rm -f $(MANDIR)/man8/builddbm.8rad
+#	@if [ -d /etc/pam.d/ ] && [ ! -f /etc/pam.d/radius ]; then \
+#		$(INSTALL) -m 644 ../redhat/radiusd-pam /etc/pam.d/radius;\
+#	fi
 	# Install the config files
 	@echo; echo "Creating/updating files in $(RADIUS_DIR)"; \
 	cd ../raddb; \

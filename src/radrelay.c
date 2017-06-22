@@ -362,6 +362,14 @@ int do_send(int sockfd, struct sockaddr_in *sin,char *secret,struct request *r)
 	now = time(NULL);
 	if (r->retrans > now)
 		return 0;
+
+	/*
+	 *      When retransmitting, update the request-id.
+	 */
+	if (r->retrans > 0){
+		r->id = radius_id & 0xff;
+		radius_id++;
+	}
 	r->retrans = now + 3;
 
 	/*

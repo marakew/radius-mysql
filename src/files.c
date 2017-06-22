@@ -28,7 +28,7 @@ char files_rcsid[] =
 #include	<errno.h>
 
 #include	"radiusd.h"
-#include	"cache.h"
+//#include	"cache.h"
 
 #ifdef USE_DBM
 #  include      <dbm.h>
@@ -194,6 +194,16 @@ static int portcmp(VALUE_PAIR *check, VALUE_PAIR *request)
  */
 static int groupcmp(VALUE_PAIR *check, char *username)
 {
+#ifdef USEMYSQL
+	SQL_PWD	*sql_pwd;
+// 	DEBUG("groupcmp %s %s %s",check->name,check->strvalue,username);	
+	if ((sql_pwd = sql_getpwname(username)) == NULL)
+		return	-1;
+//	DEBUG("strcmp %s %s %s",check->name,check->strvalue,group[sql_pwd->igroup].rgname);
+	if (strcmp(check->strvalue,group[sql_pwd->igroup].grname) == NULL)
+		return 	0;
+	return -1;
+#else
 	struct passwd *pwd;
 	struct group *grp;
 	char **member;
@@ -216,6 +226,7 @@ static int groupcmp(VALUE_PAIR *check, char *username)
 		}
 	}
 	return retval;
+#endif
 }
 
 /*
@@ -304,6 +315,17 @@ static int paircmp(VALUE_PAIR *request, VALUE_PAIR *check)
 #endif
 			case PW_SIMULTANEOUS_USE:
 			case PW_STRIP_USERNAME:
+#ifdef USEMYSQL
+			case PW_TOTAL_TIME_LIMIT:
+			case PW_PERIOD_LIMIT:
+			case PW_DAILY_TIME_LIMIT:
+			case PW_WEEKLY_TIME_LIMIT:
+			case PW_MONTLY_TIME_LIMIT:
+			case PW_TOTAL_TRAFFIC_LIMIT:
+			case PW_MONTLY_TRAFFIC_LIMIT:
+//			case PW_WEEKLY_TRAFFIC_LIMIT:
+//			case PW_DAILY_TRAFFIC_LIMIT:
+#endif
 				check_item = check_item->next;
 				continue;
 		}
@@ -383,6 +405,14 @@ static int paircmp(VALUE_PAIR *request, VALUE_PAIR *check)
 				else
 				compare = strcmp(auth_item->strvalue,
 						 check_item->strvalue);
+				break;
+
+			case PW_TYPE_INTEGER8:
+				compare = auth_item->lvalueh -
+					check_item->lvalueh;
+				if (compare == 0)
+					compare = auth_item->lvalue -
+						check_item->lvalue;
 				break;
 
 			case PW_TYPE_INTEGER:
@@ -507,6 +537,13 @@ static int hunt_paircmp(VALUE_PAIR *request, VALUE_PAIR *check)
 				else
 				if (strcmp(check_item->strvalue,
 						auth_item->strvalue) == 0) {
+					result = 0;
+				}
+				break;
+
+			case PW_TYPE_INTEGER8:
+				if(check_item->lvalueh == auth_item->lvalueh &&
+				   check_item->lvalue == auth_item->lvalue) {
 					result = 0;
 				}
 				break;
@@ -1061,6 +1098,7 @@ int user_find(char *name, VALUE_PAIR *request_pairs,
  *	Match a username with a wildcard expression.
  *	Is very limited for now.
  */
+#ifdef BAD
 static int matches(char *name, PAIR_LIST *pl, char *matchpart, int matchlen)
 {
 	int len, wlen;
@@ -1254,7 +1292,7 @@ int hints_setup(VALUE_PAIR *request_pairs)
 
 	return 0;
 }
-
+#endif
 /*
  *	See if the huntgroup matches.
  */
@@ -1748,12 +1786,12 @@ int read_config_files()
 		if (file_read(buffer, radius_dir, &huntgroups, 1) < 0)
 			return -1;
 	}
-	sprintf(buffer, "%.200s/%.50s", radius_dir, RADIUS_HINTS);
+/*	sprintf(buffer, "%.200s/%.50s", radius_dir, RADIUS_HINTS);
 	if (stat(buffer, &st) == 0 || errno != ENOENT) {
 		if (file_read(buffer, radius_dir, &hints, 1) < 0)
 			return -1;
 	}
-
+*/
 	sprintf(buffer, "%.200s/%.50s", radius_dir, RADIUS_CLIENTS);
 	if (read_clients_file(buffer) < 0)
 		return -1;
@@ -1767,7 +1805,7 @@ int read_config_files()
 		if (read_realms_file(buffer) < 0)
 			return -1;
 	}
-
+/*
 	if (cache_passwd) {
 		log(L_INFO, "HASH:  Reinitializing hash structures "
 			"and lists for caching...");
@@ -1782,6 +1820,6 @@ int read_config_files()
 			return -1;
 		}
 	}
-
+*/
 	return 0;
 }

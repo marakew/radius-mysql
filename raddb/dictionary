@@ -34,6 +34,7 @@ $INCLUDE dictionary.tunnel
 $INCLUDE dictionary.usr
 $INCLUDE dictionary.ascend
 $INCLUDE dictionary.cistron
+$INCLUDE dictionary.microsoft
 
 #
 #	Following are the proper new names. Use these.
@@ -247,6 +248,7 @@ VALUE		Auth-Type		ActivCard		4
 #
 #	Cistron extensions
 #
+VALUE		Auth-Type		Mysql			252
 VALUE		Auth-Type		Pam			253
 VALUE		Auth-Type		Accept			254
 
@@ -266,3 +268,22 @@ VALUE		Strip-User-Name		Yes			1
 VALUE		Server-Config		Password-Expiration	30
 VALUE		Server-Config		Password-Warning	5
 
+#	Time Limit
+
+#ATTRIBUTE	Total-Time-Limit             2001	integer
+#ATTRIBUTE	Period-Limit                 2002	integer
+#ATTRIBUTE	Daily-Time-Limit             2003	integer
+#ATTRIBUTE	Weekly-Time-Limit            2004	integer
+#ATTRIBUTE	Montly-Time-Limit           2005	integer
+#ATTRIBUTE	Montly-Traffic-Limit        2006	integer
+#ATTRIBUTE	Total-Traffic-Limit          2007	integer
+
+# Octets-Limit
+ATTRIBUTE	Session-Octets-Limit	227		integer
+ATTRIBUTE	Octets-Direction	228		integer
+
+
+VALUE		Octets-Direction	Sum		0
+VALUE		Octets-Direction	Input		1
+VALUE		Octets-Direction	Output		2
+VALUE		Octets-Direction	Max		3

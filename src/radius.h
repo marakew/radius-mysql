@@ -49,12 +49,14 @@ typedef struct pw_auth_hdr {
 #define PW_ACCT_UDP_PORT		1646
 
 #define VENDORPEC_USR			429
+#define VENDORPEC_REDBACK		2352
 #define VENDORPEC_CISTRON		8246
 
 #define PW_TYPE_STRING			0
 #define PW_TYPE_INTEGER			1
 #define PW_TYPE_IPADDR			2
 #define PW_TYPE_DATE			3
+#define PW_TYPE_INTEGER8		4
 
 
 #define	PW_AUTHENTICATION_REQUEST	1
@@ -118,8 +120,12 @@ typedef struct pw_auth_hdr {
 #define PW_PORT_LIMIT			62
 #define PW_CONNECT_INFO			77
 
+
+#define PW_ACCT_INTERIM_INTERVAL	85
+
 /* Vendor specific attributes */
 #define PW_CISTRON_PROXIED_TO		((VENDORPEC_CISTRON<<16)|11)
+#define PW_RBAK_BIND_SUB_USER_AT_CTX	((VENDORPEC_REDBACK<<16)|58)
 
 /* Server side attributes */
 #define PW_FALL_THROUGH			500
@@ -184,6 +190,7 @@ typedef struct pw_auth_hdr {
 #define PW_AUTHTYPE_SECURID		2
 #define PW_AUTHTYPE_CRYPT		3
 #define PW_AUTHTYPE_REJECT		4
+#define PW_AUTHTYPE_MYSQL		252
 #define PW_AUTHTYPE_PAM			253
 #define PW_AUTHTYPE_ACCEPT		254
 
@@ -201,4 +208,49 @@ typedef struct pw_auth_hdr {
 #define PW_STATUS_ALIVE			3
 #define PW_STATUS_ACCOUNTING_ON		7
 #define PW_STATUS_ACCOUNTING_OFF	8
+
+/*	TIME LIMIT	*/
+
+#define PW_TOTAL_TIME_LIMIT		2001
+#define PW_PERIOD_LIMIT			2002
+#define PW_DAILY_TIME_LIMIT		2003
+#define PW_WEEKLY_TIME_LIMIT		2004
+#define PW_MONTLY_TIME_LIMIT		2005
+#define PW_MONTLY_TRAFFIC_LIMIT		2006
+#define PW_TOTAL_TRAFFIC_LIMIT		2007
+
+/*	MICROSOFT	*/
+
+#define	PW_CHAPMS_CHALLENGE		((311<<16)|11)
+#define	PW_CHAPMS_RESPONSE		((311<<16)|1)
+#define PW_CHAPMS_ERROR			((311<<16)|2)
+#define	PW_CHAP_MPPE_KEYS		((311<<16)|12)
+#define PW_MSMPPE_ENCRIPTION_POLICY	((311<<16)|7)
+#define PW_MSMPPE_ENCRIPTION_TYPES	((311<<16)|8)
+#define	PW_MSMPPE_SEND_KEY		((311<<16)|16)
+#define	PW_MSMPPE_RECV_KEY		((311<<16)|17)
+#define	PW_CHAPMS2_RESPONSE		((311<<16)|25)
+#define	PW_CHAPMS2_SUCCESS		((311<<16)|26)
+
+/* MPPE POLICY */
+
+#define MPPE_POLICY_NONE		0
+#define MPPE_POLICY_ALLOWED		1
+#define MPPE_POLICY_REQUIRED		2
+
+/* MPPE TYPES */
+#define MPPE_TYPE_0			0
+#define MPPE_TYPE_40			2
+#define MPPE_TYPE_128			4
+#define MPPE_TYPE_56			8
+
+/*	SESSION LIMITS	*/
+
+#define PW_SESSION_OCTETS_LIMIT		227
+#define PW_OCTETS_DIRECTION		228
+
+#define PW_OCTETS_DIRECTION_SUM		0
+#define PW_OCTETS_DIRECTION_IN		1
+#define PW_OCTETS_DIRECTION_OUT		2
+#define PW_OCTETS_DIRECTION_MAX		3
 

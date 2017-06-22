@@ -1,0 +1,15 @@
+mysqladmin create data
+mysql data < access.sql
+
+# for billing use
+mysql data < usertime.sql
+mysql data < userdata.sql
+mysql data < grp.sql
+mysql data < hourgroup.sql
+mysql data < trafgroup.sql
+mysql data < tariff.sql
+mysql data < holiday.sql
+
+# for web intefaces
+mysql data < operators.sql
+mysql data < history.sql

@@ -168,6 +168,16 @@ void fprint_attr_val(FILE *fd, VALUE_PAIR *pair)
 		}
 		break;
 
+	case PW_TYPE_INTEGER8:
+#ifdef USE_LONGLONG
+		fprintf(fd, PERCENT_LONGLONG,
+			((UINT8)pair->lvalueh << 32) | pair->lvalue);
+#else
+		fprintf(fd, "0x%08x%08x", (unsigned int)pair->lvalueh,
+					  (unsigned int)pair->lvalue);
+#endif
+		break;
+
 	case PW_TYPE_IPADDR:
 		if (pair->lvalue == 0 && pair->strvalue[0] != 0) {
 			/* Why is this??? - EvB */

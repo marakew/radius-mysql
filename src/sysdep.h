@@ -16,10 +16,13 @@
 #  endif
 #endif
 
+#ifndef _UINT4_T
+#define _UNIT4_T
 #if defined(__alpha) && (defined(__osf__) || defined(__linux__))
 typedef unsigned int	UINT4;
 #else
-typedef unsigned long	UINT4;
+typedef unsigned long int UINT4;
+#endif
 #endif
 
 #ifdef BSD

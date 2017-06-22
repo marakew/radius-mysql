@@ -73,10 +73,18 @@ void auth_type_fixup(VALUE_PAIR *check)
 				inplace = 1;
 				n = PW_AUTHTYPE_SYSTEM;
 				s = "System";
-			} else if (strcmp(vp->strvalue, "PAM") == 0) {
+			} else 
+#ifdef PAM
+			if (strcmp(vp->strvalue, "PAM") == 0) {
 				inplace = 1;
 				n = PW_AUTHTYPE_PAM;
 				s = "Pam";
+			} else 
+#endif
+			if (strcmp(vp->strvalue, "MYSQL") == 0) {
+				inplace = 1;
+				n = PW_AUTHTYPE_MYSQL;
+				s = "Mysql";
 			} else {
 				inplace = 0;
 				n = PW_AUTHTYPE_LOCAL;
@@ -319,13 +327,15 @@ int file_read(char *file, char *dir, PAIR_LIST **ret, int resolve)
 				fclose(fp);
 				return -1;
 			}
-			if (last)
-				last->next = t;
-			else
-				pl = t;
-			last = t;
-			while (last && last->next)
-				last = last->next;
+			if (t) {
+				if (last)
+					last->next = t;
+				else
+					pl = t;
+				last = t;
+				while (last && last->next)
+					last = last->next;
+			}
 			continue;
 		}
 

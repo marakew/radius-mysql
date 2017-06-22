@@ -331,7 +331,7 @@ int rad_accounting_radxtmp(AUTH_REQ *authreq, int dowtmp)
 	 *	Add any specific attributes for this username.
 	 */
 	if (!rb_record && vp != NULL) {
-		hints_setup(authreq->request);
+//		hints_setup(authreq->request);
 		presuf_setup(authreq->request);
 	}
 	time(&t);
@@ -698,6 +698,11 @@ int rad_accounting_detail(AUTH_REQ *authreq, int authtype, char *f)
 	char		*s;
 	int		len, ret = 0;
 
+#ifdef USEMYSQL
+	SESSION_REC rec;
+	memset(&rec,0,sizeof(rec));
+#endif
+
 	/*
 	 *	See if we have an accounting directory. If not,
 	 *	return.
@@ -755,6 +760,9 @@ int rad_accounting_detail(AUTH_REQ *authreq, int authtype, char *f)
 				fputs("\t", outfd);
 				fprint_attr_val(outfd, pair);
 				fputs("\n", outfd);
+#ifdef USEMYSQL
+				get_session(pair,&rec);
+#endif
 			}
 			pair = pair->next;
 		}
@@ -774,6 +782,9 @@ int rad_accounting_detail(AUTH_REQ *authreq, int authtype, char *f)
 		fclose(outfd);
 	} while(0);
 
+#ifdef USEMYSQL
+	save_session(&rec);
+#endif
 	return ret;
 }
 

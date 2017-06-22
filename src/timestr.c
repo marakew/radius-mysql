@@ -14,7 +14,9 @@ char *timestr_rcsid =
 #include <ctype.h>
 
 static char *days[] =
-	{ "su", "mo", "tu", "we", "th", "fr", "sa", "wk", "any", "al" };
+	{ "su", "mo", "tu", "we", "th", "fr", "sa",  "hl", "wk", "any", "al" };
+
+int extern holiday_table[];
 
 #define DAYMIN		(24*60)
 #define WEEKMIN		(24*60*7)
@@ -35,7 +37,7 @@ static int strcode (char **str)
 
 	xprintf("strcode %s called\n", *str);
 
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 11; i++) {
 		l = strlen(days[i]);
 		if (l > strlen(*str))
 			continue;
@@ -46,7 +48,7 @@ static int strcode (char **str)
 	}
 	xprintf("strcode result %d\n", i);
 
-	return (i >= 10) ? -1 : i;
+	return (i >= 11) ? -1 : i;
 
 }
 
@@ -107,11 +109,12 @@ static int hour_fill(char *bitmap, char *tm)
 /*
  *	Call the fill bitmap function for every day listed.
  */
-static int day_fill(char *bitmap, char *tm)
+static int day_fill(char *bitmap, char *tm, struct tm *stm)
 {
 	char		*hr;
 	int		n;
 	int		start, end;
+	int		i;
 
 	for (hr = tm; *hr; hr++)
 		if (isdigit(*hr))
@@ -131,13 +134,26 @@ static int day_fill(char *bitmap, char *tm)
 				break;
 		} else
 			end = start;
-		if (start == 7) {
+		if (start == 8) {
 			start = 1;
 			end = 5;
 		}
-		if (start > 7) {
+		if (start > 8) {
 			start = 0;
 			end = 6;
+		}
+		if (start == 7){
+			i = 0;
+			while (holiday_table[i] != 0)
+				if (holiday_table[i] == (stm->tm_yday+1) ){
+					start = stm->tm_wday;
+					end = start;
+					break;
+				}else{
+					start = 11;
+					end = 11;
+					i++;
+				}
 		}
 		n = start;
 		xprintf("day_fill: range from %d to %d\n", start, end);
@@ -155,7 +171,7 @@ static int day_fill(char *bitmap, char *tm)
 /*
  *	Fill the week bitmap with allowed times.
  */
-static int week_fill(char *bitmap, char *tm)
+static int week_fill(char *bitmap, char *tm, struct tm *stm)
 {
 	char		*s;
 	char		tmp[128];
@@ -167,7 +183,7 @@ static int week_fill(char *bitmap, char *tm)
 
 	s = strtok(tmp, ",|");
 	while (s) {
-		day_fill(bitmap, s);
+		day_fill(bitmap, s, stm);
 		s = strtok(NULL, ",|");
 	}
 
@@ -194,7 +210,7 @@ int timestr_match(char *tmstr, time_t t)
 	now = tm->tm_wday * DAYMIN + tm->tm_hour * 60 + tm->tm_min;
 	tot = 0;
 	memset(bitmap, 0, sizeof(bitmap));
-	week_fill(bitmap, tmstr);
+	week_fill(bitmap, tmstr, tm);
 
 #if DEBUG2
 	memset(null, 0, 8);

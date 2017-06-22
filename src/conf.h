@@ -6,7 +6,7 @@
  */
 
 /* Default Database File Names */
-#define RADIUS_DIR		"/etc/raddb"
+#define RADIUS_DIR		"/usr/local/etc/raddb"
 #define RADLOG_DIR		"/var/log"
 
 #ifdef aix

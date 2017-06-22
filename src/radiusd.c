@@ -115,7 +115,13 @@ static void reread_config(int reload)
 	/* Read users file etc. */
 	if (res == 0 && read_config_files() != 0)
 		res = -1;
-
+#ifdef USEMYSQL
+	/* Read and init mysql config */
+	if (res == 0 && sql_read_config() != 0){
+/*		log(L_ERR,"MYSQL Error: MySQL could not be initialized"); */
+		res = -1;
+	}
+#endif
 	if (res != 0) {
 		if (pid == radius_pid) {
 			log(L_ERR|L_CONS,
@@ -668,6 +674,8 @@ int radrespond(AUTH_REQ *authreq, int activefd)
 		 *	We don't support this anymore.
 		 */
 		/* rad_passchange(authreq, activefd); */
+		log(L_ERR, "Unsupported change password request packet "
+			   "from nas [%s]", client_name(authreq->ipaddr));
 		break;
 
 	case PW_STATUS_SERVER:
@@ -675,6 +683,8 @@ int radrespond(AUTH_REQ *authreq, int activefd)
 		break;
 
 	default:
+		log(L_ERR, "Unknown packet type [%d] from nas [%s]",
+			authreq->code, client_name(authreq->ipaddr));
 		break;
 	}
 
@@ -687,6 +697,8 @@ int radrespond(AUTH_REQ *authreq, int activefd)
 			rad_spawn_child(authreq, activefd, fun);
 		else
 			(*fun)(authreq, activefd);
+	} else {
+		authfree(authreq);
 	}
 
 	return 0;

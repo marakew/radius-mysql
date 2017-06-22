@@ -1,0 +1,8 @@
+# for billing use
+mysql data < test_grp.sql
+mysql data < test_hourgroup.sql
+mysql data < test_trafgroup.sql
+mysql data < test_holiday.sql
+
+# for web interfaces
+mysql data < test_operators.sql

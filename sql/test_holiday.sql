@@ -1,0 +1,8 @@
+INSERT INTO holiday VALUES ('01-01');
+INSERT INTO holiday VALUES ('03-08');
+INSERT INTO holiday VALUES ('05-01');
+INSERT INTO holiday VALUES ('05-02');
+INSERT INTO holiday VALUES ('05-09');
+INSERT INTO holiday VALUES ('06-28');
+INSERT INTO holiday VALUES ('08-24');
+INSERT INTO holiday VALUES ('12-31');

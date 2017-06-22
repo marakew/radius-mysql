@@ -157,6 +157,9 @@ static DICT_ATTR *parse_attr(char *buffer, int line_no, char *dict_file,
 	if (strcmp(typestr, "string") == 0) {
 		type = PW_TYPE_STRING;
 	}
+	else if(strcmp(typestr, "integer8") == 0) {
+		type = PW_TYPE_INTEGER8;
+	}
 	else if(strcmp(typestr, "integer") == 0) {
 		type = PW_TYPE_INTEGER;
 	}

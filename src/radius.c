@@ -22,6 +22,7 @@ char radius_rcsid[] =
 #include	<pwd.h>
 #include	<time.h>
 #include	<ctype.h>
+#include	<errno.h>
 
 #include	"radiusd.h"
 
@@ -214,6 +215,23 @@ int rad_build_packet(AUTH_HDR *auth, int auth_len,
 			total_length += len + 2;
 			break;
 
+		case PW_TYPE_INTEGER8:
+			/* No support for tagged 64bit integers! */
+			len = 8;
+#ifdef ATTRIB_NMC
+			if (vendorpec != VENDORPEC_USR)
+#endif
+				*ptr++ = len + 2;
+			if (length_ptr) *length_ptr += len + 2;
+			lvalue = htonl(vp->lvalueh);
+			memcpy(ptr, &lvalue, sizeof(UINT4));
+			ptr += sizeof(UINT4);
+			lvalue = htonl(vp->lvalue);
+			memcpy(ptr, &lvalue, sizeof(UINT4));
+			ptr += sizeof(UINT4);
+			total_length += len + 2;
+			break;
+
 		case PW_TYPE_INTEGER:
 		case PW_TYPE_DATE:
 		case PW_TYPE_IPADDR:
@@ -353,8 +371,21 @@ int rad_send_reply(int code, AUTH_REQ *authreq, VALUE_PAIR *oreply,
 	/*
 	 *	Send it to the user
 	 */
-	sendto(activefd, (char *)auth, (int)total_length, (int)0,
-			&saremote, sizeof(struct sockaddr_in));
+	if (sendto(activefd, (char *)auth, (int)total_length, (int)0,
+			&saremote, sizeof(struct sockaddr_in)) < 0) {
+		VALUE_PAIR      *vp;
+		char            *n;
+		char            tmp[16];
+
+		if ((vp = pairfind(authreq->request, PW_USER_NAME)) != NULL) {
+			n = vp->strvalue;
+		} else {
+			sprintf(tmp, "id %d", authreq->id);
+			n = tmp;
+		}
+		log(L_ERR, "error sending radius packet for %s: %s", n,
+			strerror(errno));
+	}
 
 	/*
 	 *	Just to be tidy move pairs back.
@@ -516,17 +547,32 @@ static VALUE_PAIR *decode_attr(AUTH_REQ *authreq, u_char *ptr,
 			debug_pair(stdout, pair);
 			break;
 
+		case PW_TYPE_INTEGER8:
+			/* No support for tagged 64bit integers */
+			if (pair->length >= 8) {
+				memcpy(&lvalue, ptr, sizeof(UINT4));
+				pair->lvalueh = ntohl(lvalue);
+				ptr += 4;
+			}
+			if (pair->length >= 4) {
+				memcpy(&lvalue, ptr, sizeof(UINT4));
+				pair->lvalue = ntohl(lvalue);
+			}
+			break;
+	
 		case PW_TYPE_INTEGER:
 		case PW_TYPE_IPADDR:
 			/* Is pair->length nowhere needed anymore? */ 
 	
+			lvalue = 0;
 			/* Support *inserted* tags for IP addresses */
 			if (pair->flags.has_tag && 
-			    pair->type != PW_TYPE_INTEGER) {
+			    pair->type != PW_TYPE_INTEGER &&
+			    pair->length >= 5) {
 				pair->flags.tag = *ptr;
 				memcpy(&lvalue, ptr + 1, sizeof(UINT4));
 			}
-			else {
+			else if (pair->length >= 4) {
 				memcpy(&lvalue, ptr, sizeof(UINT4));
 			}
 			pair->lvalue = ntohl(lvalue);

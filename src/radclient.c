@@ -105,10 +105,33 @@ int getport(char *svc, int def)
 	return svp ? ntohs((u_short)svp->s_port) : def;
 }
 
+/*
+ *	Calculate the encoded chap password.
+ */
+static int rad_chapencode(char *in, char *out, int id, char *vector)
+{
+	char    buf[256];
+	int     len, maxlen;
+
+	maxlen = sizeof(buf) - 18;
+	if (strlen(in) > maxlen)
+		in[maxlen] = 0;
+	len = strlen(in);
+	buf[0] = id;
+	memcpy(buf + 1, in, len);
+	memcpy(buf + 1 + len, vector, 16);
+	len += 17;
+
+	out[0] = id;
+	md5_calc(out + 1, buf, len);
+
+	return 17;
+}
+
 int main(int argc, char **argv)
 {
 	AUTH_HDR		*auth;
-	VALUE_PAIR		*req, *vp;
+	VALUE_PAIR		*req, *vp, *tp;
 	FILE			*fp;
 	UINT4			local_ip = 0;
 	struct	sockaddr	salocal;
@@ -128,6 +151,7 @@ int main(int argc, char **argv)
 	int			result;
 	int			length;
 	int			i;
+	int			chapid;
 
 	if ((progname = strrchr(argv[0], '/')) == NULL)
 		progname = argv[0];
@@ -284,6 +308,15 @@ int main(int argc, char **argv)
 		if (vp->attribute == PW_PASSWORD) {
 			vp->length = rad_pwencode(vp->strvalue,
 				vp->strvalue, secretkey, auth->vector);
+		}
+		if (vp->attribute == PW_CHAP_PASSWORD) {
+			if ((tp = pairfind(req, PW_CHAP_CHALLENGE)) != NULL)
+				p = tp->strvalue;
+			else
+				p = auth->vector;
+			chapid = (getppid() ^ getpid()) & 0xff;
+			vp->length = rad_chapencode(vp->strvalue,
+				vp->strvalue, chapid, p);
 		}
 	}
 

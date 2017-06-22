@@ -1,38 +1,34 @@
 #
-# Makefile	Radius Makefile for Linux (2.2/2.4, libc6 aka glibc)
+# Makefile	Radius Makefile for BSD (FreeBSD, NetBSD, etc)
 #
 #
-
-#
-#	Autoselect -lshadow and -lcrypt
-#
-ifneq ($(wildcard /usr/lib/libshadow.a),)
-LSHADOW	= -lshadow
-endif
-ifneq ($(wildcard /usr/lib/libcrypt.a),)
-LCRYPT	= -lcrypt
-endif
 
 CC	= gcc
-CFLAGS	= -Wall -g # -DNOSHADOW
-LDFLAGS	=
-LIBS	= $(LSHADOW)
+CFLAGS	= -g -O -Wall -DNOSHADOW -I/usr/include -I/usr/local/include
+LDFLAGS	= # -s
+LIBS	=
+#LCRYPT	= -lcrypt -lcrypto -L/usr/local/lib
+#LCRYPT	= -lcrypt -lcrypto -ldescrypt
+LCRYPT	= -lcrypt -lcrypto
 
 # Set these to the correct values if you want DBM support.
-# Values are USE_DBM, USE_NDBM, USE_GDBM, USE_DB1, USE_DB2, USE_DB3
-#            -ldbm    -lnbdm    -lgdbm    -ldb     -ldb     -ldb
-#DBM	= -DUSE_DB3
-#DBMLIB	= -ldb
+#DBM     = -DUSE_DB1
+#DBMLIB  = #-ldb
 
-# Uncomment these if you want PAM support
 #PAM	= -DPAM
-#PAMLIB	= -lpam -ldl
+#PAMLIB	= -lpam
+
+# mysql
+MYSQL  = -DUSEMYSQL -DCHAP -DCHAPMS -DCHAPMS2
+#MYSQL  += -DCREATE_NAME_TABLE
+#MYSQL  = -DUSEMYSQL
+MYSQLLIB = -lmysqlclient -L/usr/local/lib/mysql
 
 INSTALL = install
-DINSTALL = install -d
+DINSTALL = mkdir -p
 
 BINDIR  = /usr/local/bin
 SBINDIR = /usr/local/sbin
 MANDIR  = /usr/local/man
 
-include Make.inc
+.include "Make.inc"

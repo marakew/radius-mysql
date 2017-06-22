@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS 'hourgroup';
+DROP TABLE IF EXISTS 'trafgroup';
+DROP TABLE IF EXISTS 'holiday';
+DROP TABLE IF EXISTS 'grp';

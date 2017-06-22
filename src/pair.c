@@ -47,6 +47,9 @@ VALUE_PAIR *paircreate(int attr, int type)
 	else
 		sprintf(vp->name, "Attr-%d", attr);
 	switch (vp->type) {
+		case PW_TYPE_INTEGER8:
+			vp->length = 8;
+			break;
 		case PW_TYPE_INTEGER:
 		case PW_TYPE_IPADDR:
 		case PW_TYPE_DATE:
@@ -340,12 +343,23 @@ static int escape(char **uptr)
 	char	buf[4];
 
 	p = *uptr;
+
+	/* Octal \123 */
 	if (isdigit(p[0]) && isdigit(p[1]) && isdigit(p[2])) {
 		memcpy(buf, p, 3);
-		buf[4] = 0;
+		buf[3] = 0;
 		p += 3;
 		*uptr = p;
 		return strtol(buf, NULL, 8);
+	}
+
+	/* Hex \xff */
+	if (p[0] == 'x' && isxdigit(p[1]) && isxdigit(p[2])) {
+		memcpy(buf, p + 1, 2);
+		buf[2] = 0;
+		p += 3;
+		*uptr = p;
+		return strtol(buf, NULL, 16);
 	}
 
 	c = *p++;
@@ -432,6 +446,7 @@ int userparse(char *buffer, VALUE_PAIR **first_pair, int resolve)
 	int		operator;
 	int		rcode;
 	int		tag;
+	int		base;
 
 	rcode = USERPARSE_EOS;
 	mode = PARSE_MODE_NAME;
@@ -602,13 +617,17 @@ int userparse(char *buffer, VALUE_PAIR **first_pair, int resolve)
 				pair->length = strlen(pair->strvalue);
 				break;
 
+			case PW_TYPE_INTEGER8:
+				break;
+
 			case PW_TYPE_INTEGER:
 				/*
 				 *	If it starts with a digit, it must
 				 *	be a number (or a range).
 				 */
 				if (isdigit(*valstr)) {
-					pair->lvalue = strtoul(valstr, NULL, 10);
+					/* strtoul knows about 0x */
+					pair->lvalue = strtoul(valstr, NULL, 0);
 					pair->length = 4;
 				}
 				else if ((dval = dict_valfind(valstr, attr->name)) == NULL) {

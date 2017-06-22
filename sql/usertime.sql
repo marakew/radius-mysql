@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS usertime (
+	id varchar(32) NOT NULL default '',
+	time_on int(11) NOT NULL default '0',
+	name varchar(32) NOT NULL default '',
+	server varchar(15) NOT NULL default '',
+	port smallint(6) default NULL,
+	ip varchar(15) default NULL,
+	inbytes int(11) default NULL,
+	outbytes int(11) default NULL,
+	stop_time datetime NOT NULL default '0000-00-00 00:00:00',
+	start_time datetime NOT NULL default '2001-01-01 00:00:00',
+	connect_info varchar(28) default NULL,
+	cost double NOT NULL default '0',
+	costh double NOT NULL default '0',
+	costt double NOT NULL default '0',
+	deposit double NOT NULL default '0',
+	call_to char(15) default NULL,
+	call_from char(15) default NULL,
+	prefix char(1) NOT NULL default '0',
+	term_cause smallint(3) NOT NULL default '0',
+	status smallint(1) NOT NULL default '0',
+	PRIMARY KEY (id,server,name)
+) TYPE=MyISAM;
