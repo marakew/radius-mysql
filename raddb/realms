@@ -1,0 +1,51 @@
+#
+# realms	This file contains a list of realms. When a user logs
+#		in with @realm as the last part of the loginname,
+#		the realm part is looked up in this file. If found,
+#		the request is sent to the listed remote radius server.
+#
+#		You will also have to set up a DEFAULT entry in the 'users'
+#		file to accept responses for that realm.  See doc/README.proxy
+#		and the 'users' file for more information.
+#
+#
+#		Description of the fields:
+#
+#		* The first field is a realm name.
+#		  +55512345 matches all users who are calling to
+#		   number 55512345, provided that you NAS sends the
+#		   Called-Station-Id attribute to the server.
+#		  NULL matches users without a realm
+#		  DEFAULT matches all realms except the NULL realm
+#
+#		* The second field is a hostname. Optional is :port to
+#		  use a non-standard port. In that case, port is the
+#		  authentication port and the accounting port is taken
+#		  as port + 1.
+#		  If this field is set to LOCAL, the request is processed
+#		  locally without sending it to a remote radius server.
+#
+#		* An extra field with comma-separated options can follow.
+#		  Currently defined options:
+#		  - nostrip	do not strip @realm from the username
+#		  - hints	use username as after "hints" processing
+#		  - noauth	do not proxy authentication packets,
+#				only process them locally.
+#		  - noacct	do not proxy accounting packets,
+#				just log them locally.
+#		  - trusted	trust all attributes received from the
+#				remote server and pass them along to
+#				the client (normally, only 
+#
+
+# Realm                 Remote server [:port]		Options
+#----------------	---------------------		-------
+#isp2.com		radius.isp2.com			nostrip,hints
+#company.com		radius.company.com:1600
+#bla.com		LOCAL				hints
+#
+# A NULL LOCAL entry can be useful because it sets the server-side
+# Realm check attribute to NULL. That way you can explicitly check
+# against the NULL realm in the users file.
+#NULL			LOCAL				hints
+

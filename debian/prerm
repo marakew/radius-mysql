@@ -1,0 +1,17 @@
+#! /bin/sh
+
+case "$1" in
+  upgrade|remove)
+	/etc/init.d/radiusd stop
+	[ -L /usr/doc/radiusd-cistron ] && rm -f /usr/doc/radiusd-cistron
+	;;
+  upgrade)
+	/etc/init.d/radiusd stop
+	;;
+  failed-upgrade)
+	;;
+  deconfigure)
+	;;
+esac
+
+exit 0

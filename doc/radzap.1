@@ -1,0 +1,48 @@
+.TH RADZAP 1 "22 Februari 2001" "" "Cistron Radius Daemon"
+.SH NAME
+radzap -- remove rogue entries from the active sessions database
+.SH SYNOPSIS
+.B radzap
+.RB [ \-v ]
+.RB [ \-d
+.IR radius_dir ]
+.RB [ \-W
+.IR radwtmp_filename ]
+.RB [ \-u
+.IR radutmp_filename ]
+.I nas
+.RB [ port ]
+.RB [ username ]
+.SH DESCRIPTION
+The Cistron Radius server maintains an active session database
+in a file called \fIradutmp\fP. Commands like \fBradwho\fP(1)
+use this database. Sometimes that database can get out of sync,
+and then it might contain rogue entries. \fBRadzap\fP can
+clean up this database.
+.SH OPTIONS
+.IP \-v
+Verbose. Shows you what it is doing.
+.IP "\-d \fIradius_dir\fP"
+Path to the directory that contains the configuration files.
+.IP "\-W \fIradwtmp_filename\fP"
+The path to the wtmp-style accounting file maintained by the radius server.
+Defaults to (on most systems) \fI/var/log/radwtmp\fP.
+.IP "\-u \fIradutmp_filename\fP"
+The path to the radutmp file, which is the session-database aka list
+of logged in users. Defaults to (on most systems) \fI/var/log/radutmp\fP.
+
+.IP nas
+Hostname or IP address of the NAS (Network Access Server, sometimes
+called "terminal server") of the session you want to remove.
+.IP port
+Port of the session you want to remove. This is the NAS-Port
+radius attribute, it doesn't have anything to do with UDP port
+numbers. Must be an integer. \fB-1\fP means "any", and is the
+default if this option is not specified.
+.IP username
+Optional: the username of the session you want to remove.
+.SH SEE ALSO
+radwho(1),
+radiusd(8).
+.SH AUTHOR
+Miquel van Smoorenburg, miquels@cistron.nl.

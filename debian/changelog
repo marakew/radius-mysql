@@ -1,0 +1,38 @@
+radiusd-cistron (1.6.6) local; urgency=low
+
+  * Fix typo in scripts/rc.radiusd
+  * Added missing files to debian/conffiles
+
+ -- Miquel van Smoorenburg <miquels@cistron.nl>  Wed,  6 Feb 2002 16:20:28 +0100
+
+radiusd-cistron (1.6.5) local; urgency=low
+
+  * New upstream version.
+  * Now builds with PAM and DBM support by default
+
+ -- Miquel van Smoorenburg <miquels@cistron.nl>  Sun, 22 Jul 2001 13:10:21 +0200
+
+radiusd-cistron (1.6.4) local; urgency=low
+
+  * New upstream version.
+
+ -- Miquel van Smoorenburg <miquels@cistron.nl>  Wed,  7 Jun 2000 17:58:13 +0200
+
+radiusd-cistron (1.6.3) local; urgency=low
+
+  * New upstream version.
+
+ -- Miquel van Smoorenburg <miquels@cistron.nl>  Thu, 23 Mar 2000 00:27:57 +0100
+
+radiusd-cistron (1.6.1) unstable; urgency=high
+
+  * New upstream version.
+
+ -- Miquel van Smoorenburg <miquels@cistron.nl>  Tue, 28 Sep 1999 13:17:47 +0200
+
+radiusd-cistron (1.6.0) cistron; urgency=low
+
+  * For the rest of the changelog see the upstream one.
+
+ -- Miquel van Smoorenburg <miquels@cistron.nl>  Tue, 28 Sep 1999 13:17:28 +0200
+

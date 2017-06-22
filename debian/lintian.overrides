@@ -1,0 +1,3 @@
+radiusd-cistron: non-standard-file-perm etc/raddb/clients 0640 != 0644
+radiusd-cistron: non-standard-file-perm etc/raddb/naspasswd 0640 != 0644
+radiusd-cistron: non-standard-file-perm etc/raddb/users 0640 != 0644

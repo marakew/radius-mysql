@@ -1,0 +1,26 @@
+#
+# Makefile	Radius Makefile for BSD (FreeBSD, NetBSD, etc)
+#
+#
+
+CC	= gcc
+CFLAGS	= -Wall -g -DNOSHADOW
+LDFLAGS	= # -s
+LIBS	=
+LCRYPT	= -lcrypt
+
+# Set these to the correct values if you want DBM support.
+#DBM     = -DUSE_DB1
+#DBMLIB  = #-ldb
+
+#PAM	= -DPAM
+#PAMLIB	= -lpam
+
+INSTALL = install
+DINSTALL = mkdir -p
+
+BINDIR  = /usr/local/bin
+SBINDIR = /usr/local/sbin
+MANDIR  = /usr/local/man
+
+.include "Make.inc"

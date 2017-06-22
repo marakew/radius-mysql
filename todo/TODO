@@ -1,0 +1,55 @@
+WISHLIST:
+
+
+MEDIUM PRIORITY:
+(Might be fixed someday)
+o retransmits from the terminal server get proxied with
+  a new ID and random_vector. We should check for this! (is this still true?)
+
+LOW PRIORITY:
+(we will not fix this in Cistron Radius, use FreeRadius after it gets
+ released)
+o Allow for a accounting program, that gets all the accounting info on
+  its stdin. If it dies radiusd should restart it. This program could send
+  info to an SQL database or somesuch.
+o Provide a way to define the locations of all files (/etc/raddb/radiusd.conf?)
+o Support Connect-Rate
+o take out host-order IP addresses
+o Write better documentation
+o Manual pages for the daemon, utilities and conffiles (some done)
+o Fix all FIXME's in the source.
+
+DONE:
+o Radius proxy support.
+o Max-Simultaneous-Use parameter to avoid double logins.
+o Specify a program to be run on succesful login
+o Prefix/Suffix support
+o Change radutmp format to v2 (see radutmp.h)
+o move radutmp to /var/log ?
+o Compatibility with radius-2.0
+o Support for pidfile
+o Configurable logging: both radutmp/radwtmp and details files
+o session_id is not numeric but an 8-byte (?) string !
+o Detect reboot packet sent by portmaster and clear radutmp / wtmp
+o Seperate /etc/raddb/clients into public and private file (secret == secret!)
+  Add ts-type field to clients file for checklogin.pl
+  Better: return clients to old form (no shortname) and add a new file,
+  "nas" or so. Matching on this file is done based on Nas-Ip-Address
+  instead of the IP address of the sender. Better if there's a proxy
+  in between.
+o Allow spaces in usernames (using " or \ to escape)
+o Return Proxy-State A/V pairs, in the right order.
+o Limit logins based on time/date 
+  (for example, Login-Hour = 8-18, Login-Day = 0-5 for business hours)
+o Provide a way to turn off new style accounting (switch, conffile?)
+o add 'allowall" option to /etc/raddb/realms
+o builddbm.c needs to build the database under another name (users.n) and
+  rename() the resulting database files into place atomically
+o [optimization] files.c:user_find() should keep the dbm database open.
+  It should check to see if it got updated every 10 seconds though using stat()
+o Fix DBM support:
+  - Multiple defaults (done)
+  - Fallthrough (hard for not DEFAULT entries)
+  - Spaces in username (Using " or \) (done)
+o if +55512345 is present in /etc/raddb/realms, check called-station-id
+  against it and treat it as a realm if it matches

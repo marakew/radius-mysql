@@ -1,0 +1,38 @@
+.TH RADUSE 1 "24 Februari 2001" "" "Cistron Radius Daemon"
+.SH NAME
+rasuse -- Shows the usage of the modem lines on a terminal server.
+.SH SYNOPSIS
+.B raduse
+.RB [ \-d
+.IR radius_dir ]
+.RB [ \-W
+.IR radwtmp_filename ]
+.RB [ \-w ]
+.RB [ \-o
+.IR offset ]
+.I terminal-server
+.SH DESCRIPTION
+\fBRaduse\fP shows the usage of the modem lines on a terminal server.
+This program gets its info from the radwtmp file, which
+is sloooww on larger servers, and the data from the
+radwtmp file can't be trusted 100% either.
+.PP
+It is deprecated and not documented very well. Don't use it.
+.SH OPTIONS
+.IP "\-d \fIradius_dir\fP"
+Path to the directory that contains the configuration files.
+.IP "\-W \fIradwtmp_filename\fP"
+The path to the wtmp-style accounting file maintained by the radius server.
+Defaults to (on most systems) \fI/var/log/radwtmp\fP.
+.IP \-w
+Wide output format
+.IP "\-o \fIoffset\fP"
+Start showing nas-port from this offset.
+.IP terminal-server
+The NAS to show.
+.SH SEE ALSO
+radiusd(8),
+wtmp(5),
+last(1).
+.SH AUTHOR
+Miquel van Smoorenburg, miquels@cistron.nl.

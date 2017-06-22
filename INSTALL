@@ -1,0 +1,56 @@
+
+  Ignore this file if you have a pre-installed binary package.
+
+  [note that there are no `official' binary packages distributed by
+   the Cistron Radius developers - but vendors such as RedHat or
+   Debian might include them with the Linux distribution]
+
+  It's probably a good idea to first read the general doc/README.
+
+  You will need to:
+
+  o Edit src/conf.h to adjust the paths for the logfiles, if
+    you are not happy with the defauls. Which by the way are:
+    - logfile in /var/log/radius.log
+    - accounting detail files in /var/log/radacct/
+    - configuration files in /etc/raddb/.
+      Note that if you change this, you need to change the
+      RADIUS_DIR setting in "Make.inc" as well or "make install"
+      will not work.
+
+  o If you have Ascend gear, adjust ASCEND_CHANNELS_PER_LINE
+    in src/conf.h to be correct for your ISDN connection.
+
+  o Go to the src/ directory and copy the right Makefile.whatever
+    to "Makefile", then edit it to adjust it to your system.
+    Here you can for example turn on PAM or DBM support.
+    Read doc/README.makefile for details.
+
+  o Build the binaries, and install them:
+
+       # make
+       # make install
+
+  o If you have a Debian system, you might want to install rc.radiusd
+    as /etc/init.d/radiusd and install startup symlinks with
+    "update-rc.d radiusd defaults".
+
+  o If you have a RedHat system, you might want to install
+    redhat/rc.radiusd as /etc/rc.d/init.d/radiusd. Edit it and fix the
+    RADIUSD and RADRELAY paths so that they point to /usr/local/sbin,
+    then use tksysv or your favorite runlevel editor to start
+    it in runlevel 2 or 3.
+
+  o Read the manual page for radiusd(8) and see if you need to
+    specify any special options on the command line.
+
+  o Start radiusd, using "/usr/local/sbin/radiusd [options]". If you
+    installed the /etc/init.d/radiusd script, you can use
+    "/etc/init.d/radiusd start".
+
+  o If you are not using the /etc/init.d/radiusd script, you
+    probably want to put something in your startup scripts so
+    that the server gets started automatically at bootup.
+
+
+	$Id: INSTALL,v 1.7 2001/12/13 15:17:45 miquels Exp $

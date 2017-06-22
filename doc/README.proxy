@@ -1,0 +1,150 @@
+
+		Cistron-Radius as a proxy radius server.
+
+
+0. INTRODUCTION
+
+  It is now possible to use Cistron Radius as a proxy radius server. This
+  means that it can consult a remote radius server to validate a user.
+  This is handy for roaming setups, or for renting ports to someone else.
+
+1. FILES
+
+  If a user logs in as username@realm, the "realm" part is looked up in
+  the file /etc/raddb/realms. The format of this file is, for now:
+
+  realm		remoteserver[:port]	options
+
+  All accounting data for proxied requests does NOT get stored in the
+  standard logfiles, but in a seperate directory. The name of this
+  directory is the name of the remote radius server, and if you want you
+  can define a nickname for it in /etc/raddb/naslist just as for normal NASes.
+
+  You need to add the hostname and secret for the remote server in the
+  file /etc/raddb/clients. On the remote server you need to add the
+  hostname of your server and the same secret to /etc/raddb/clients as well.
+
+  Realms that start with a '+' are special. The part after the '+'
+  is compared with the Called-Station-Id in the request packet. That
+  means you can proxy requests based on what telephone number the
+  user dialed, provided your telco and NAS support that attribute.
+
+  The realm "DEFAULT" (without the quotes) matches all realms.
+
+  If you set the remoteserver to "LOCAL", the request will be handled
+  locally as usual, without sending it to a remote radius server.
+
+  The realm "NULL" matches any requests WITHOUT a realm.
+
+  There are five options you can add:
+
+  - nostrip:
+    By default the @realm is stripped from the username before sending it
+    on to the remote radius server. By specifying the "nostrip" option
+    the @realm suffix will not be stripped.
+  - hints
+    By default the original username is sent to the remote radius
+    server. By specifying the "hints" option the username will be
+    sent as it is after the "hints" file was processed.
+  - noauth
+    Do not send authentication requests to the remote server, but
+    treat this as a normal authentication request.
+  - noacct
+    Do not send accounting requests to the remote server.
+  - trusted
+    Trust all attributes that the remote server returns. Normally
+    only a few records are trusted and the rest (such as
+    Framed-IP-Address and Framed-Routing) are stripped.
+
+2. WHAT HAPPENS
+
+  The exact thing that happens is this:
+
+  - A user logs in with an @realm suffix
+  - The hints file gets processed as usual
+  - The user is checked against the huntgroups file. At this point
+    the user _might_ already get rejected if the huntgroup doesn't match.
+  - The realm is looked up in the realms file. If it isn't defined,
+    the users file is processed normally.
+  - The realm suffix is stripped from the username unless "nostrip" was
+    set, and the request is sent to a remote radius server. Note that
+    any stripping done in the hints file doesn't have an effect on the
+    username sent to the remote radius server unless you set the
+    "hints" option.
+  - The remote server replies with ACK or REJECT
+
+    On ACK:       The initial Auth-Type is set to Accept
+    On REJECT:    The initial Auth-Type is set to Reject
+
+    The remote server also replies with a set of attributes. For security,
+    all attributes are stripped except:
+
+    Service-Type
+    Framed-Protocol
+    Filter-Id
+    Framed-MTU
+    Framed-Compression
+    Login-Service
+    Reply-Message
+    Session-Timeout
+    Idle-Timeout
+    Port-Limit
+
+  Then the users file is processed as usual. The username used at
+  this point is the one after hints file processing (regardless of
+  the "hints" option). It also includes the realm (regardless of the
+  setting of the "nostrip" option) unless the realm is LOCAL.
+
+  "The users file is processed as usual" means that the server takes
+  the original request, attaches the reply it got from the remote
+  server to it as reply-attributes, and starts processing the
+  users file. It reads each entry in the users file and on a match,
+  adds the reply-attributes to the list of attributes that get
+  sent back to the terminal server.
+
+3. YOU NEED AT LEAST ONE MATCHING ENTRY IN THE USERS FILE
+
+  Note that you MUST have the proxy RADIUS server configured to reply
+  to the request for that user.  The most common way is through a
+  DEFAULT entry, such as:
+
+  DEFAULT
+	Reply-Message = "Hello from the proxy"
+
+
+  If you think about it, this make sense.  The user MUST get an IP address,
+  session timeout, or idle timeout from the proxy server, NOT the end
+  server which authenticates them.  If you have your proxy configured
+  to give the user NO attributes, then the user is authorized to do
+  NOTHING.  In fact, they're not even authorized to log in.  This means
+  that their request gets rejected by the proxy RADIUS server, usually
+  with an 'Invalid user' or 'Unknown user' error message.  (Seen when
+  in debugging mode.)
+
+  The ONLY solution is to make sure that the proxy RADIUS server knows
+  about the user, and knows what attributes to give the user.  After all,
+  if the proxy server doesn't know about the user, it cannot respond to
+  the user, can it?
+
+  If you really trust the remote server, i.e. you set 'trusted' in
+  the options, the server returns all attributes needed (like
+  Framed-IP-Address, or Session-Timeout, or Login-Host), and you
+  don't want to add any other attributes from the users file to the
+  reply sent to the NAS, you can put this at the top of your users file:
+
+  DEFAULT	Realm = "the_trusted_realmname"
+		Reply-Message = "all is well"
+
+  This will ensure that right there, the server stops processing the
+  users file for this request and returns a reply to the NAS.
+  In fact, the Reply-Message isn't needed at all, you can leave that
+  out. It was just added as an example.
+
+  And if all your realms are "trusted", you can do:
+
+  DEFAULT	Realm != ""
+		Reply-Message = "hey, it works"
+
+  For normal requests, the "Realm" attribute is not set so this will
+  not match. All requests with realms will match ` != "" '.
+

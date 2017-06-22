@@ -1,0 +1,68 @@
+.TH RADRELAY 1 "22 November 2001" "" "Cistron Radius Daemon"
+.SH NAME
+radrelay -- replicate accounting data to another RADIUS server
+.SH SYNOPSIS
+.B radrelay
+.RB [ \-P
+.IR pidfile ]
+.RB [ \-a
+.IR accounting_dir ]
+.RB [ \-d
+.IR config_dir ]
+.RB [ \-f ]
+.RB [ \-i
+.IR source_ip ]
+.RB [ \-s
+.IR secret ]
+\fIserver detailfile\fP
+.SH DESCRIPTION
+\fBRadrelay\fP reads a file in the \fIdetail\fP file format,
+reconstructs radius packets from it and sends them to a remote
+radius server. When end-of-file is reached, the file is truncated.
+\fBRadrelay\fP then waits until additional data to be written to
+the file, and starts over again.
+.PP
+
+.SH OPTIONS
+
+.IP "\-P \fIpid_filename\fP"
+At  startup, \fBradrelay\fP writes  its  process-id to a file.
+By default that is \fIvar/run/radrelay.pid\fP, this option
+overrides that.
+
+.IP "\-a \fIaccounting_directory\fP"
+
+The base directory to use to read the detail file from.
+
+.IP "\-d \fIconfig_directory\fP"
+
+The directory where the dictionary and clients files are.
+
+.IP \-f
+
+Do \fInot\fP fork and run in the background as a daemon.
+
+.IP "\-i \fIsource_ip\fP"
+The source IP address to use for sending radius packets.
+
+.IP "\-s \fIsecret\fP"
+Normally the secret for the remote server is looked up in
+\fI/etc/raddb/clients\fP. This option overrides the secret
+specified in that file.
+
+.IP detailfile
+File to read the attribute/value pairs from. If this is not specified,
+they are read from stdin.
+
+.IP "server[:port]"
+The hostname or IP address of the remote server. Optionally a UDP port
+can be specified. If no UDP port is specified, it is looked up in
+\fI/etc/services\fP. The service name looked for is \fBradacct\fP for
+accounting packets. If a service is not found in \fI/etc/services\fP,
+1646 is used.
+
+.SH SEE ALSO
+radiusd(8),
+doc/README.radrelay.
+.SH AUTHOR
+Miquel van Smoorenburg, miquels@cistron.nl.

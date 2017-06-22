@@ -1,0 +1,3 @@
+#! /bin/sh
+
+exec last -f /var/log/radwtmp $*

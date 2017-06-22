@@ -1,0 +1,21 @@
+Source: radiusd-cistron
+Section: net
+Priority: extra
+Maintainer: Root <root@localhost>
+Standards-Version: 3.1.1.0
+Build-Depends: libpam0g-dev, libdb3-dev
+
+Package: radiusd-cistron
+Architecture: any
+Depends: ${shlibs:Depends}
+Provides: radius-server
+Conflicts: radius-server, radiusd-livingston
+Description: Radius server written by Cistron.
+ RADIUS is a means of managing clients' access to network services, and is
+ described by RFCs 2865 to 2869.
+ .
+ This GPLed Radius server is not based on any Livingston code. It is
+ compatible with the Livingston-2.01 server though. Over radius-2.01,
+ it has support for Exec-Program on authentication, it is possible to limit
+ the number of concurrent logins reliably, it has tagged attribute
+ support, it can replicate accounting packets, and more.

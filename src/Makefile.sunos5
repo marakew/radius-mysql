@@ -1,0 +1,26 @@
+#
+# Makefile	Radius Makefile for Solaris 2.5.x
+#
+
+CC	= gcc
+CFLAGS	= -g # -DNOSHADOW
+LDFLAGS	= # -s
+LIBS	= -lsocket -lnsl
+LCRYPT	=
+
+# Set these to the correct values if you want DBM support.
+#DBM     = -DUSE_NDBM
+#DBMLIB  = -ldb
+
+# PAM currently only supported on Linux, not Solaris
+#PAM	= -DPAM
+#PAMLIB	= -lpam
+
+INSTALL = /usr/ucb/install
+DINSTALL = mkdir -p
+
+BINDIR  = /usr/local/bin
+SBINDIR = /usr/local/sbin
+MANDIR  = /usr/local/man
+
+include Make.inc

@@ -1,0 +1,70 @@
+#! /bin/sh
+#
+# radiusd	Start the radius daemon.
+#
+#		This is a script suitable for the Redhat Linux distribution.
+#		Copy it to /etc/rc.d/init.d/radiusd.init and
+#		use tksysv or your favorite runlevel editor to start it
+#		at runlevel 3
+#
+# chkconfig: 345 98 10
+# description: Ativa/Desativa servidor Radius
+
+RADIUSD=/usr/sbin/radiusd
+RADRELAY=/usr/sbin/radrelay
+DESC="Cistron radius server"
+LOCKF=/var/lock/subsys/radiusd
+
+# These are the defaults.
+RADIUS_ARGS="-y"
+
+# This is useful if you want to replicate accounting packets
+# to another radius server - see README.radrelay
+#RADIUS_ARGS="-y -w -F %N/detail -F detail.rep"
+#RADRELAY_ARGS="-a /var/log/radacct XX.SERVER.HERE.XX detail.rep"
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+test -f $RADIUSD || exit 0
+test -f /etc/raddb/clients || exit 0
+
+case "$1" in
+  start)
+	[ -f /var/log/radutmp ] || touch /var/log/radutmp
+	echo -n "Starting $DESC: "
+	if [ -x "$RADRELAY" ] && [ -n "$RADRELAY_ARGS" ]
+	then
+		echo -n "radrelay "
+		daemon $RADRELAY $RADRELAY_ARGS
+	fi
+	daemon $RADIUSD $RADIUS_ARGS
+	echo "radiusd."
+	touch $LOCKF
+	;;
+  stop)
+	[ -z "$2" ] && echo -n "Stopping $DESC: "
+	if [ -x "$RADRELAY" ] && [ -n "$RADRELAY_ARGS" ]
+	then
+		[ -z "$2" ] && echo -n "radrelay "
+		killproc $RADRELAY 2>/dev/null
+	fi
+	killproc $RADIUSD 2> /dev/null
+	[ -z "$2" ] && echo "radiusd."
+	rm -f $LOCKF
+	;;
+  reload)
+	echo "Reloading $DESC configuration files."
+	killproc -1 $RADIUSD
+	;;
+  restart)
+	$0 stop quiet
+	sleep 3
+	$0 start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|reload|restart}"
+	exit 1
+esac
+
+exit 0

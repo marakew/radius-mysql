@@ -1,0 +1,20 @@
+.TH RADWATCH 8 "24 Februari 2001" "" "Cistron Radius Daemon"
+.SH NAME
+radwatch -- wrapper for radiusd
+.SH SYNOPSIS
+.B radwatch
+.IR [ options ]
+.SH DESCRIPTION
+This is a wrapper for \fIradiusd\fP. It starts the radius server, then
+waits for it to terminate, which should never happen. If it does
+happen, \fBradwatch\fP sends mail to \fIroot\fP informing her of
+the event, waits 10 seconds, then restarts the server.
+.PP
+The Cistron Radius server is now stable enough that this wrapper
+really isn't needed anymore.
+.SH OPTIONS
+Passed directly to the radius server - see the manpage of \fBradiusd\fP.
+.SH SEE ALSO
+radiusd(8).
+.SH AUTHOR
+Miquel van Smoorenburg, miquels@cistron.nl.

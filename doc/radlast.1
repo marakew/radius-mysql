@@ -1,0 +1,20 @@
+.TH RADLAST 1 "22 Februari 2001" "" "Cistron Radius Daemon"
+.SH NAME
+radlast -- show "last" info from the radwtmp file
+.SH SYNOPSIS
+.B radlast
+.IR [ options ]
+.SH DESCRIPTION
+The Cistron Radius server can write an accounting log in the
+\fIwtmp\fP format of the local system.  \fBRadlast\fP is a frontend
+for the systems \fBlast\fP command - it just calls \fBlast\fP
+with the \fI-f path_to_radwtmp_file\fP argument, and passes all
+options on the command line to the system \fBlast\fP command.
+.SH OPTIONS
+See the manpage of the system \fBlast\fP command.
+.SH SEE ALSO
+radiusd(8),
+wtmp(5),
+last(1).
+.SH AUTHOR
+Miquel van Smoorenburg, miquels@cistron.nl.

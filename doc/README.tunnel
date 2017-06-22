@@ -1,0 +1,166 @@
+
+        TUNNEL SUPPORT: TAGGED & ENCRYPTED ATTRIBUTES
+
+
+0. Introduction
+
+More and more NASes are able to set up L2TP or L2F tunnels these
+days. The L2F (layer 2 forwarding) protocol and the newer L2TP
+(layer two tunneling protocol) allows a complete PPP session
+to be re-framed in e.g. UDP and forwarded a the device that will
+actually handle the PPP session: do LCP and IPCP negotiation,
+assign IP addresses, apply filters, and so on.
+
+This can be used for e.g. roaming dial-up access: you dial into a
+NAS, the NAS recognises your realm, sets up a tunnel to your home
+site / ISP and forwards your PPP session to that tunnel endpoint,
+where you'll get authenticated and authorised as if you were
+directly connected to the tunnel endpoint.
+
+
+1. Tunnels and Radius
+
+Obviously, the NAS needs to know the tunnel endpoint that belongs
+to a specific user realm. Also obviously, managing a table like
+this on each NAS in your network, is not really a nice job.
+
+So how can RADIUS help here? By keeping the realm-to-tunnel
+mapping table on the RADIUS server, and telling the NASes on 
+request what tunneling parameters need to be applied to a specific 
+session.
+
+The IETF document that has the details on the new RADIUS attributes
+to carry these tunnel parameters is RFC 2868. Reading it before
+using these attributes is really, really a good idea.
+
+
+2. Tunneling attributes
+
+The nasty thing about these new attributes is that they contain
+a sort of, but not really, optional numeric attribute tag field,
+which is inserted before, or overlaps with, the value field.
+
+(It's a bit of a mess, really, and the purpose isn't all that 
+clear either - you'll have to use your imagination a bit before 
+you really think of a good use for these tags. And afther that, 
+you'll be left with a vague feeling like 'there must be a better 
+way to do that, but I can't really think of one right now...'. 
+But that may just have been me; read the ietf draft and see for 
+yourself).
+
+Anyway, the NAS vendors like them, and it's better to use these
+attributes than a vendor specific solution anyway, so I've added
+tagged attribute support to Cistron RADIUS.
+
+Another thing is the fact that L2TP tunnels are to be
+authenticated themselves using a shared secret. The RADIUS 
+attribute to tell the NAS the secret for authenticating to the 
+other tunnel endpoint must, for obvious reasons, be encrypted. 
+This is also specified in the draft for that attribute.
+
+
+3. Changes to Cistron RADIUS
+
+There are a couple of changes with respect to Cistron's files:
+
+* The dictionary:
+
+  The optional fourth field of the attribute definition lines in 
+  the dictionary in which the vendor could be specified has been
+  changed to a more general optional options field.
+
+  Multiple options are allowed, separated by commas, but be sure
+  not to add any whitespace anywhere in the options field.
+
+  Currently recognised options are:
+
+  -	has_tag		Boolean option; specifies whether this
+	or		attribute can have a numeric tag.
+	has_tag=	(Numeric version: specify 0 (default)
+			 for no or something !=0 for yes.)
+	
+  -	encrypt=	Numeric option; specifies the encryption
+			method for this attribute.
+			Valid values currently are:
+				0 - no encryption (default)
+				1 - do 'Tunnel-Password'-style
+				    encryption per draft-ietf
+				    radius-tunnel-auth-09.
+			Of course, other methods may be added if
+			a new standard emerges.
+
+  -	vend=		String option; specifies the vendor for
+			a vendor-specific attribute.
+
+  -	<vendor>	'Boolean' option; specifies the vendor 
+			in the old way, for backwards 
+			compatibility. This is tried after the
+			normal options, so a vendor called
+			'has_tag' can only be specified using
+			the new syntax ;-)
+
+* The users file:
+
+  Check- and reply items having attributes for which the has_tag
+  flag is present in the dictionary, may optionally have a tag
+  specified. If no tag is specified for such an attribute, the
+  parser will assume 0 as the tag.
+
+  The syntax for a tagged attribute is:
+
+	attribute[:tag] operator value
+
+  An asterisk ('*') may also be specified as the tag for 
+  check items. This indicates that the check item is to be 
+  compared to a matching received attribute, regardless of 
+  its tag. Otherwise, an attribute with a different tag is
+  considered a different attribute. 
+
+  This is a little different from e.g. Merit's implementation, 
+  where a tag is really considered part of the value of the 
+  attribute. This is only true if you look at how the tags 
+  are sent in a radius packet; if you look at the introduction
+  in the ietf draft, you can see that a tag effectively says 
+  something about attributes, not about values:
+
+    'Multiple instances of each of the attributes defined below 
+    may be included in a single RADIUS packet. In this case, 
+    the attributes to be applied to any given tunnel SHOULD all 
+    contain the same value in their respective Tag fields; 
+    otherwise, the Tag field SHOULD NOT be used.  
+
+    If the RADIUS server returns attributes describing multiple 
+    tunnels then the tunnels SHOULD be interpreted by the tunnel 
+    initiator as alternatives and the server SHOULD include an 
+    instance of the Tunnel-Preference Attribute in the set of 
+    Attributes pertaining to each alternative tunnel.  
+
+    Similarly, if the RADIUS client includes multiple sets of 
+    tunnel Attributes in an Access-Request packet, all the 
+    Attributes pertaining to a given tunnel SHOULD contain the 
+    same value in their respective Tag fiels and each set SHOULD 
+    include an appropriately valued instance of the 
+    Tunnel-Preference Attribute.' 
+
+  It's rather vague, in my opinion, so for those who prefer
+  Merit's syntax (attribute = :tag:value), I've provided
+  an option in conf.h to switch between the two.
+
+  Note that the selected syntax for the users file is also
+  used as the output format in the accounting detail files.
+
+
+That's it, basically. If you'd like more details, look in
+radius.c (rad_build_packet, radrecv), proxy.c (proxy_receive),
+pair.c (userparse) and attrprint.c, that's where the most
+important changes are.
+
+If you have any suggestions for improvement, or dislike my
+implementation for any reason, please don't hestitate to 
+contact me at emile@evbergen.xs4all.nl.
+
+(Miquel / Alan, this especially applies to you, of course! ;-).
+
+
+Emile van Bergen.
+

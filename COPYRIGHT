@@ -1,0 +1,18 @@
+
+			COPYRIGHT NOTICE
+
+The code in this server has been contributed by many companies and
+individuals. The copyright of each major contributed part stays with
+the contributor, and is marked as such in the source.
+
+The bulk of the code was contributed by Miquel van Smoorenburg of
+Cistron IP B.V.
+Quite a bit of hacking and finetuning was done by Alan DeKok.
+
+The server in its entirety is licensed under the GNU GPL:
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version
+	2 of the License, or (at your option) any later version.
+

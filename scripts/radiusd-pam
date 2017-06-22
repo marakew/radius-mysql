@@ -1,0 +1,18 @@
+#%PAM-1.0
+# Note that this file is not used unless you specify your authentication
+# type to be PAM in the users file.  
+# See /usr/share/doc/radiusd-cistron/README.pam.gz
+
+auth       required    pam_nologin.so
+auth       required    pam_unix.so shadow nullok
+account    required    pam_unix.so
+password   required    pam_unix.so nullok use_authtok
+session    required    pam_unix.so
+
+# Alternate strength checking for password. Note that this
+# requires the libpam-cracklib package to be installed.
+# You will need to comment out the password line above and
+# uncomment the next two in order to use this.
+#
+# password required       pam_cracklib.so retry=3 minlen=6 difok=3
+# password required       pam_unix.so use_authtok nullok md5

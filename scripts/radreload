@@ -1,0 +1,28 @@
+#!/bin/sh
+
+#
+# Use this script to reload the configuration of a running radius daemon.
+#
+# If there are any errors in the configuration files, then a warning message
+# will be printed.
+#
+# If there were no errors, then the running server is sent a HUP signal
+# to reload it's database, and the last few lines of the log file are shown.
+#
+# $Id: radreload,v 1.1 2001/07/26 16:59:39 aland Exp $
+#
+
+RADIUSD=/usr/local/sbin/radiusd
+RADIUSD_PID=/var/run/radiusd.pid
+
+if $RADIUSD -C
+then
+	kill -HUP `cat $RADIUSD_PID`
+	sleep 1
+	tail /var/log/radius.log
+else
+	echo
+	echo "There is an error in one of the radius configuration files you just edited!"
+	echo "Please go and fix it or restore a backup file before trying this command again."
+
+fi

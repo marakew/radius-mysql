@@ -1,0 +1,101 @@
+
+
+	Configuring a Nortel CVX NAS for Radius.
+
+
+
+Cistron Internet has used CVX1800 equipment for some time. Here's
+a sample configuration based on what we used.
+
+Highlights:
+
+o It sets the mgmt_addr which is needed to get the CVX to send the
+  NAS-IP-Address attribute.
+o This config assumes you have 2 radius servers, a primary and
+  a backup server.
+o The CVX monitors which server is up using status-server polling.
+  It switches over to the secondary when the primary is gone but
+  switches back to the primary when it comes back up. Well, it
+  should anyway - I'm not that much of a CVX guru yet.
+
+configure system
+  configure ip_services
+    configure ip_services_config
+      set mgmt_addr <ethernet IP address here!>
+      commit
+    return
+    configure ip_service
+      configure ip_dns_ns 1
+        set ip_addr <Primary DNS IP number here>
+        commit
+      return
+      configure ip_dns_ns 2
+        set ip_addr <Secondary DNS IP number here>
+        commit
+      return
+    configure ip_aaa_remote
+      configure ip_aaa_group 1
+        configure ip_aaa_radius_config
+          set session_id_style hex
+          set vendor_spec_id disable
+          commit
+        return
+        configure ip_aaa_set 1
+          configure ip_aaa_server 1
+            set ip_addr <IP address of primary radius server here>
+            set ip_port 1645
+            set key <shared secretkey here>
+            set trace true
+            set monitor_type status-server
+            commit
+          return
+          configure ip_aaa_server 2
+            set ip_addr <IP address of secondary radius server here>
+            set ip_port 1645
+            set key <shared secretkey here>
+            set trace true
+            set monitor_type status-server
+            commit
+          return
+          configure ip_aaa_set_config
+            set name "Authentication Set"
+            set mode monitor
+            commit
+          return
+        return
+      return
+      configure ip_aaa_group 2
+        configure ip_aaa_radius_config
+          set session_id_style hex
+          set vendor_spec_id disable
+          commit
+        return
+        configure ip_aaa_set 1
+          configure ip_aaa_server 1
+            set ip_addr <IP address of primary radius server here>
+            set ip_port 1646
+            set key <shared secretkey here>
+            set trace true
+            set monitor_type status-server
+            commit
+          return
+          configure ip_aaa_server 2
+            set ip_addr <IP address of secondary radius server here>
+            set ip_port 1646
+            set key <shared secretkey here>
+            set trace true
+            set monitor_type status-server
+            commit
+          return
+          configure ip_aaa_set_config
+            set name "Accounting Set"
+            set mode monitor
+            commit
+          return
+        return
+      return
+    return
+  return
+return
+
+	$Id: README.CVX,v 1.2 2001/12/13 15:19:32 miquels Exp $

@@ -1,0 +1,28 @@
+#
+#		Cistron specific attributes dictionary. The
+#		attributes defined here are used for communication
+#		between Cistron Radius servers (eg radrelay) or
+#		for Cistron IP internal projects.
+#
+# Version:	$Id: dictionary.cistron,v 1.2 2002/01/22 14:13:44 miquels Exp $
+#
+
+VENDOR		Cistron		8246
+
+#
+# Cistron internal project: integrated DHCP/Radius server for ADSL.
+#
+ATTRIBUTE	Cistron-DHCP-Request		1	string	Cistron
+ATTRIBUTE	Cistron-DHCP-Pool		2	string	Cistron
+ATTRIBUTE	Cistron-DHCP-Max-Addresses	3	string	Cistron
+ATTRIBUTE	Cistron-DHCP-Subnet-Mask	101	ipaddr	Cistron
+ATTRIBUTE	Cistron-DHCP-Router		103	ipaddr	Cistron
+ATTRIBUTE	Cistron-DHCP-Domain-Name-Server	106	ipaddr	Cistron
+ATTRIBUTE	Cistron-DHCP-Lease-Time		151	integer	Cistron
+
+#
+# For interserver communication.
+#
+ATTRIBUTE	Cistron-Server-Identification	10	ipaddr	Cistron
+ATTRIBUTE	Cistron-Proxied-To		11	ipaddr	Cistron
+
