@@ -1,5 +1,14 @@
 Project discontinue since 2007 year
 
+* mysql store database
+* user (deposit, credit, block, ip, prefix)
+* group (hourgroup, trafgroup, holiday, traffic-limit)
+* password store: clear text - (pap, chap-md5, chap-ms1, chap-ms2), nthash - (chap-ms1, chap-ms2)
+* supported: Attribute Session-Octets, Session-Direction, Alive packet
+* supported: mppe(40/56/128bit) returned key at Radius-Attribute
+* supported: NAS on/off case
+* PHP interface for admin/user
+
 ------------------
 
   debian/	Files to build a radiusd-cistron Debian package
