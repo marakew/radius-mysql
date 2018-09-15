@@ -1,0 +1,20 @@
+#!/bin/sh
+#		$1	$2	   $3
+# radkill $ip-server $nas-port $ip-client
+#
+#
+# For Cisco
+# `/usr/bin/snmpset -v1 $1 public .1.3.6.1.4.1.9.2.9.10.0 i $2`
+ 
+# For PPP under FreeBSD
+PPP=`/usr/bin/netstat -rn | /usr/bin/grep $3 | /usr/bin/awk '{print $6}'`
+
+# For PPP under Linux! - suxxxx
+#PPP=`/usr/bin/route -n | /usr/bin/grep $3 | /usr/bin/awk {`print $8'}`
+
+if [ $PPP ]; then
+	if [ -f /var/run/$PPP.pid ]; then
+	PID=`/bin/cat /var/run/$PPP.pid`
+	kill -1 $PID
+	fi
+fi
