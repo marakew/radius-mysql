@@ -9,6 +9,10 @@ Project discontinue since 2007 year
 * supported: NAS on/off case
 * PHP interface for admin/user
 
+<img width="100%" src="https://github.com/marakew/radius-mysql/blob/master/img/AdminOnline.jpg">
+
+<img width="100%" src="https://github.com/marakew/radius-mysql/blob/master/img/AdminOnline.jpg">
+
 ------------------
 
   debian/	Files to build a radiusd-cistron Debian package
